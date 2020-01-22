@@ -74,6 +74,23 @@ namespace catapult { namespace crypto {
 		std::memcpy(output.data(), outputKeyingMaterial.data(), Hash256::Size);
 	}
 
+	void KdfSp800_56C_Hmac_Sha256_32(const SharedSecret& sharedSecret, SharedKey& output) {
+		constexpr auto Label_Length = 8;
+		std::array<uint8_t, Label_Length> label{ { 0x63, 0x61, 0x74, 0x61, 0x70, 0x75, 0x6c, 0x74 } };
+
+		// specialized for single repetition, initial part of the buffer contains counter.
+		std::array<uint8_t, sizeof(uint32_t) + SharedSecret::Size + Label_Length> buffer{ { 0, 0, 0, 1 } };
+
+		std::memcpy(&buffer[sizeof(uint32_t)], sharedSecret.data(), SharedSecret::Size);
+		std::memcpy(&buffer[sizeof(uint32_t) + SharedSecret::Size], label.data(), Label_Length);
+
+		Hash256 zeroSalt;
+		Hash256 hash;
+		Hmac_Sha256(zeroSalt, buffer, hash);
+
+		std::memcpy(output.data(), hash.data(), Hash256::Size);
+	}
+
 	namespace {
 		// region byte / byte array helpers
 

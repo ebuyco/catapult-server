@@ -259,6 +259,28 @@ namespace catapult { namespace crypto {
 		EXPECT_EQ(expected, test::ToHexString(output));
 	}
 
+	TEST(TEST_CLASS, Kdf_Hmac_Sha256_32_Tests) {
+		// Arrange:
+		std::vector<uint8_t> salt(32);
+		auto label = test::HexStringToVector("6361746170756c74");
+
+		for (auto i = 0; i < 10; ++i) {
+			// - calculate expected output using generic implementation
+			auto sharedSecret = test::GenerateRandomByteArray<SharedSecret>();
+			std::vector<uint8_t> secretVec(sharedSecret.cbegin(), sharedSecret.cend());
+			std::vector<uint8_t> expectedOutput(32);
+			KdfSp800_56C_Hmac_Sha256(secretVec, salt, expectedOutput, label);
+
+			// Act:
+			SharedKey sharedKey;
+			KdfSp800_56C_Hmac_Sha256_32(sharedSecret, sharedKey);
+
+			// Assert:
+			std::vector<uint8_t> sharedKeyVec(sharedKey.cbegin(), sharedKey.cend());
+			EXPECT_EQ(expectedOutput, sharedKeyVec);
+		}
+	}
+
 	// endregion
 
 	TEST(TEST_CLASS, PassesTestVector) {
