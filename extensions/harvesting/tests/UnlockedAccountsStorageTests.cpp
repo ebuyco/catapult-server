@@ -44,7 +44,7 @@ namespace catapult { namespace harvesting {
 		auto PrepareEntries(const crypto::KeyPair& keyPair, const std::vector<Key>& privateKeyBuffers) {
 			test::UnlockedTestEntries entries;
 			for (const auto& privateKeyBuffer : privateKeyBuffers) {
-				auto entry = test::PrepareUnlockedTestEntry(keyPair, privateKeyBuffer);
+				auto entry = test::PrepareUnlockedTestEntry(keyPair.publicKey(), privateKeyBuffer);
 				entries.emplace(entry);
 			}
 
@@ -117,7 +117,7 @@ namespace catapult { namespace harvesting {
 		UnlockedAccountsStorage storage(guard.name());
 		auto keyPair = test::GenerateKeyPair();
 		auto privateKeyBuffer = test::GenerateRandomByteArray<Key>();
-		auto entry = test::ConvertUnlockedTestEntryToBuffer(test::PrepareUnlockedTestEntry(keyPair, privateKeyBuffer));
+		auto entry = test::ConvertUnlockedTestEntryToBuffer(test::PrepareUnlockedTestEntry(keyPair.publicKey(), privateKeyBuffer));
 		entry.resize(entry.size() + 1);
 
 		// Act + Assert:
@@ -577,7 +577,7 @@ namespace catapult { namespace harvesting {
 		test::TempFileGuard guard(Filename);
 		auto keyPair = test::GenerateKeyPair();
 		auto randomPrivateBuffer = test::GenerateRandomByteArray<Key>();
-		auto entry = test::PrepareUnlockedTestEntry(keyPair, randomPrivateBuffer);
+		auto entry = test::PrepareUnlockedTestEntry(keyPair.publicKey(), randomPrivateBuffer);
 		AppendUnlockedEntryToFile(guard.name(), entry);
 		AppendToFile(guard.name(), sizeof(test::UnlockedTestEntry) - 1);
 
@@ -591,7 +591,7 @@ namespace catapult { namespace harvesting {
 		test::TempFileGuard guard(Filename);
 		auto keyPair = test::GenerateKeyPair();
 		auto invalidPrivateBuffer = test::GenerateRandomArray<Key::Size + 1>();
-		auto entry = test::PrepareUnlockedTestEntry(keyPair, invalidPrivateBuffer);
+		auto entry = test::PrepareUnlockedTestEntry(keyPair.publicKey(), invalidPrivateBuffer);
 		AppendUnlockedEntryToFile(guard.name(), entry);
 
 		// Act + Assert:

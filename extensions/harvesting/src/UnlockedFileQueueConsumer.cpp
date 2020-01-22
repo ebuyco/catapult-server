@@ -49,10 +49,9 @@ namespace catapult { namespace harvesting {
 
 	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(
 			const RawBuffer& saltedEncrypted,
-			const crypto::KeyPair& bootKeyPair,
-			const Key& publicKey) {
+			const crypto::KeyPair& bootKeyPair) {
 		std::vector<uint8_t> decrypted;
-		if (!crypto::TryDecryptEd25199BlockCipher(saltedEncrypted, bootKeyPair, publicKey, decrypted) || Key::Size != decrypted.size())
+		if (!crypto::TryDecryptEd25199BlockCipher(saltedEncrypted, bootKeyPair, decrypted) || Key::Size != decrypted.size())
 			return std::make_pair(crypto::PrivateKey(), false);
 
 		return std::make_pair(crypto::PrivateKey::Generate([iter = decrypted.begin()]() mutable { return *iter++; }), true);
@@ -69,10 +68,7 @@ namespace catapult { namespace harvesting {
 				return;
 
 			auto unlockedEntryMessage = DeserializeUnlockedEntryMessage(buffer);
-			auto decryptedPair = TryDecryptUnlockedEntry(
-					unlockedEntryMessage.EncryptedEntry,
-					bootKeyPair,
-					unlockedEntryMessage.AnnouncerPublicKey);
+			auto decryptedPair = TryDecryptUnlockedEntry(unlockedEntryMessage.EncryptedEntry, bootKeyPair);
 			if (!decryptedPair.second)
 				return;
 

@@ -281,7 +281,7 @@ namespace catapult { namespace harvesting {
 			UnlockedAccountsStorage storage(filename);
 			for (auto i = 0u; i < numEntries; ++i) {
 				auto privateKeyBuffer = test::GenerateRandomByteArray<Key>();
-				auto entry = test::PrepareUnlockedTestEntry(nodeOwnerKeyPair, privateKeyBuffer);
+				auto entry = test::PrepareUnlockedTestEntry(nodeOwnerKeyPair.publicKey(), privateKeyBuffer);
 				storage.add(entry.Key, entry.Payload, Key{ { static_cast<uint8_t>(i) } });
 			}
 		}

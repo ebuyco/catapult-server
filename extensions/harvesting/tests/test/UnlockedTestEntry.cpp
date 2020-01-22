@@ -46,20 +46,20 @@ namespace catapult { namespace test {
 	}
 
 	UnlockedTestEntry PrepareUnlockedTestEntry(
-			const crypto::KeyPair& keyPair,
+			const Key& recipientPublicKey,
 			const RawBuffer& entryBuffer,
 			EncryptionMutationFlag encryptionMutationFlag) {
-		return PrepareUnlockedTestEntry(test::GenerateKeyPair().publicKey(), keyPair, entryBuffer, encryptionMutationFlag);
+		return PrepareUnlockedTestEntry(test::GenerateKeyPair().publicKey(), recipientPublicKey, entryBuffer, encryptionMutationFlag);
 	}
 
 	UnlockedTestEntry PrepareUnlockedTestEntry(
 			const Key& announcerPublicKey,
-			const crypto::KeyPair& keyPair,
+			const Key& recipientPublicKey,
 			const RawBuffer& entryBuffer,
 			EncryptionMutationFlag encryptionMutationFlag) {
 		UnlockedTestEntry entry;
-		auto salt = GenerateRandomByteArray<crypto::Salt>();
-		auto sharedKey = crypto::DeriveSharedKey(keyPair, announcerPublicKey, salt);
+		auto ephemeralKeyPair = test::GenerateKeyPair();
+		auto sharedKey = crypto::DeriveSharedKey(ephemeralKeyPair, recipientPublicKey);
 		auto initializationVector = GenerateRandomByteArray<crypto::AesInitializationVector>();
 
 		std::vector<uint8_t> encrypted;
@@ -70,8 +70,8 @@ namespace catapult { namespace test {
 		AesCbcEncrypt(sharedKey, initializationVector, entryBuffer, encrypted, paddingScheme);
 
 		entry.Key = announcerPublicKey;
-		std::memcpy(entry.Payload.data(), salt.data(), crypto::Salt::Size);
-		std::memcpy(entry.Payload.data() + crypto::Salt::Size, encrypted.data(), encrypted.size());
+		std::memcpy(entry.Payload.data(), ephemeralKeyPair.publicKey().data(), Key::Size);
+		std::memcpy(entry.Payload.data() + Key::Size, encrypted.data(), encrypted.size());
 		return entry;
 	}
 

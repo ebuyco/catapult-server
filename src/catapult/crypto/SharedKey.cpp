@@ -295,7 +295,7 @@ namespace catapult { namespace crypto {
 		}
 	}
 
-	SharedKey DeriveSharedKey(const KeyPair& keyPair, const Key& otherPublicKey, const Salt& /* salt */) {
+	SharedKey DeriveSharedKey(const KeyPair& keyPair, const Key& otherPublicKey) {
 		Hash512 privHash;
 		HashPrivateKey(keyPair.privateKey(), privHash);
 

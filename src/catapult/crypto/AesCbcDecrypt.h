@@ -29,10 +29,9 @@ namespace catapult { namespace crypto {
 	/// Decrypts \a input to \a output using AES with \a key in CBC mode.
 	bool TryAesCbcDecrypt(const SharedKey& key, const RawBuffer& input, std::vector<uint8_t>& output);
 
-	/// Decrypts \a saltedEncrypted to \a decrypted using \a keyPair and \a publicKey.
+	/// Extracts ephemeral public key from \a saltedEncrypted and decrypts rest to \a decrypted using \a keyPair.
 	bool TryDecryptEd25199BlockCipher(
 			const RawBuffer& saltedEncrypted,
 			const KeyPair& keyPair,
-			const Key& publicKey,
 			std::vector<uint8_t>& decrypted);
 }}

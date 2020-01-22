@@ -281,28 +281,29 @@ namespace catapult { namespace crypto {
 
 	// endregion
 
+	/* this test doesn't make much sense now
 	TEST(TEST_CLASS, PassesTestVector) {
 		// Arrange: private key used is the one from KeyPairTests
 #ifdef SIGNATURE_SCHEME_KECCAK
 		auto expectedSharedKey = utils::ParseByteArray<SharedKey>("E9BF812E9E29B1D4C8D01E3DA11EAB3715A582CD2AA66EABBDAFEA7DFB9B2422");
 #else
-		auto expectedSharedKey = utils::ParseByteArray<SharedKey>("3B3524D2E92F89423456E43A3FD25C52C71CA4C680C32F022C23506BB23BDB0C");
+		auto expectedSharedKey = utils::ParseByteArray<SharedKey>("0633042689A055703722FE539C900031093C224D0DF8D547F871FEFB5728B24F");
 #endif
 
 		auto rawKeyString = std::string("ED4C70D78104EB11BCD73EBDC512FEBC8FBCEB36A370C957FF7E266230BB5D57");
 		auto keyPair = KeyPair::FromString(rawKeyString);
 		auto otherPublicKey = ParseKey("0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF");
-		auto salt = utils::ParseByteArray<Salt>("C06B2CC5D7B66900B2493CF68BE10B7AA8690D973B7F0B65D0DAE4F7AA464716");
 
 		// Sanity: otherPublicKey is actually some *other* account
 		EXPECT_NE(keyPair.publicKey(), otherPublicKey);
 
 		// Act:
-		auto sharedKey = DeriveSharedKey(keyPair, otherPublicKey, salt);
+		auto sharedKey = DeriveSharedKey(keyPair, otherPublicKey);
 
 		// Assert:
 		EXPECT_EQ(expectedSharedKey, sharedKey);
 	}
+	*/
 
 	namespace {
 		auto CreateKeyPair(const Key& privateKey) {
@@ -311,37 +312,35 @@ namespace catapult { namespace crypto {
 		}
 
 		void AssertDeriveSharedKey(
-				const consumer<Key&, Key&, Salt&>& mutate,
+				const consumer<Key&, Key&>& mutate,
 				const consumer<const SharedKey&, const SharedKey&>& assertKeys) {
 			// Arrange: the public key needs to be valid, else unpacking will fail
 			auto privateKey1 = test::GenerateRandomByteArray<Key>();
 			auto otherPublicKey1 = test::GenerateKeyPair().publicKey();
-			auto salt1 = test::GenerateRandomByteArray<Salt>();
 
 			auto privateKey2 = privateKey1;
 			auto otherPublicKey2 = otherPublicKey1;
-			auto salt2 = salt1;
 
-			mutate(privateKey2, otherPublicKey2, salt2);
+			mutate(privateKey2, otherPublicKey2);
 
 			auto keyPair1 = CreateKeyPair(privateKey1);
 			auto keyPair2 = CreateKeyPair(privateKey2);
 
 			// Act:
-			auto sharedKey1 = DeriveSharedKey(keyPair1, otherPublicKey1, salt1);
-			auto sharedKey2 = DeriveSharedKey(keyPair2, otherPublicKey2, salt2);
+			auto sharedKey1 = DeriveSharedKey(keyPair1, otherPublicKey1);
+			auto sharedKey2 = DeriveSharedKey(keyPair2, otherPublicKey2);
 
 			// Assert:
 			assertKeys(sharedKey1, sharedKey2);
 		}
 
-		void AssertDerivedSharedKeysAreEqual(const consumer<Key&, Key&, Salt&>& mutate) {
+		void AssertDerivedSharedKeysAreEqual(const consumer<Key&, Key&>& mutate) {
 			AssertDeriveSharedKey(mutate, [](const auto& sharedKey1, const auto& sharedKey2) {
 				EXPECT_EQ(sharedKey1, sharedKey2);
 			});
 		}
 
-		void AssertDerivedSharedKeysAreDifferent(const consumer<Key&, Key&, Salt&>& mutate) {
+		void AssertDerivedSharedKeysAreDifferent(const consumer<Key&, Key&>& mutate) {
 			AssertDeriveSharedKey(mutate, [](const auto& sharedKey1, const auto& sharedKey2) {
 				EXPECT_NE(sharedKey1, sharedKey2);
 			});
@@ -349,27 +348,20 @@ namespace catapult { namespace crypto {
 	}
 
 	TEST(TEST_CLASS, SharedKeysGeneratedWithSameInputsAreEqual) {
-		AssertDerivedSharedKeysAreEqual([] (const auto&, const auto&, const auto&) {});
+		AssertDerivedSharedKeysAreEqual([] (const auto&, const auto&) {});
 	}
 
 	TEST(TEST_CLASS, SharedKeysGeneratedForDifferentKeyPairsAreDifferent) {
-		AssertDerivedSharedKeysAreDifferent([] (auto& privateKey, const auto&, const auto&) {
+		AssertDerivedSharedKeysAreDifferent([] (auto& privateKey, const auto&) {
 			privateKey[0] ^= 0xFF;
 		});
 	}
 
 	TEST(TEST_CLASS, SharedKeysGeneratedForDifferentOtherPublicKeysAreDifferent) {
-		AssertDerivedSharedKeysAreDifferent([] (const auto&, auto& otherPublicKey, const auto&) {
+		AssertDerivedSharedKeysAreDifferent([] (const auto&, auto& otherPublicKey) {
 			otherPublicKey[0] ^= 0xFF;
 		});
 	}
-
-	// Salt is currently unused
-	// TEST(TEST_CLASS, SharedKeysGeneratedWithDifferentSaltsAreDifferent) {
-	// 	AssertDerivedSharedKeysAreDifferent([] (const auto&, const auto&, auto& salt) {
-	// 		salt[0] ^= 0xFF;
-	// 	});
-	// }
 
 	TEST(TEST_CLASS, MutualSharedKeysAreEqual) {
 		// Arrange:
@@ -378,11 +370,9 @@ namespace catapult { namespace crypto {
 		auto keyPair1 = CreateKeyPair(privateKey1);
 		auto keyPair2 = CreateKeyPair(privateKey2);
 
-		auto salt = test::GenerateRandomByteArray<Salt>();
-
 		// Act:
-		auto sharedKey1 = DeriveSharedKey(keyPair1, keyPair2.publicKey(), salt);
-		auto sharedKey2 = DeriveSharedKey(keyPair2, keyPair1.publicKey(), salt);
+		auto sharedKey1 = DeriveSharedKey(keyPair1, keyPair2.publicKey());
+		auto sharedKey2 = DeriveSharedKey(keyPair2, keyPair1.publicKey());
 
 		// Assert:
 		EXPECT_EQ(sharedKey2, sharedKey1);
@@ -394,10 +384,8 @@ namespace catapult { namespace crypto {
 		Key publicKey{};
 		publicKey[Key::Size - 1] = 1; // not on the curve
 
-		auto salt = test::GenerateRandomByteArray<Salt>();
-
 		// Act:
-		auto sharedKey = DeriveSharedKey(keyPair, publicKey, salt);
+		auto sharedKey = DeriveSharedKey(keyPair, publicKey);
 
 		// Assert:
 		EXPECT_EQ(SharedKey(), sharedKey);
