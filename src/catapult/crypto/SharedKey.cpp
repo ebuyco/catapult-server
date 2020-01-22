@@ -59,12 +59,6 @@ extern "C" {
 
 namespace catapult { namespace crypto {
 
-#ifdef _MSC_VER
-#define BSWAP(VAL) _byteswap_ulong(VAL)
-#else
-#define BSWAP(VAL) __builtin_bswap32(VAL)
-#endif
-
 	void Hkdf_Hmac_Sha256_32(const SharedSecret& sharedSecret, SharedKey& output) {
 		Hash256 zeroSalt;
 		Hash256 prk;
@@ -78,33 +72,6 @@ namespace catapult { namespace crypto {
 		Hmac_Sha256(prk, buffer, outputKeyingMaterial);
 
 		std::memcpy(output.data(), outputKeyingMaterial.data(), Hash256::Size);
-	}
-
-	void KdfSp800_56C_Hmac_Sha256(
-			const  std::vector<uint8_t>& sharedSecret,
-			const std::vector<uint8_t>& salt,
-			std::vector<uint8_t>& output,
-			const std::vector<uint8_t>& label) {
-		std::vector<uint8_t> buffer;
-		buffer.resize(sizeof(uint32_t) + sharedSecret.size() + label.size());
-
-		size_t repetitions = (output.size() + Hash256::Size - 1) / Hash256::Size;
-
-		size_t position = 0;
-		for (uint32_t counter = 1; counter <= repetitions; ++counter) {
-			uint32_t temp = BSWAP(counter);
-			std::memcpy(buffer.data(), &temp, sizeof(temp));
-			std::memcpy(&buffer[sizeof(uint32_t)], sharedSecret.data(), sharedSecret.size());
-			std::memcpy(&buffer[sizeof(uint32_t) + sharedSecret.size()], label.data(), label.size());
-
-			Hash256 hash;
-			Hmac_Sha256(salt, buffer, hash);
-
-			auto written = std::min(output.size() - position, Hash256::Size);
-			std::memcpy(&output[position], hash.data(), written);
-
-			position += written;
-		}
 	}
 
 	namespace {
