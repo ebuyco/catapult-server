@@ -28,6 +28,72 @@ namespace catapult { namespace crypto {
 
 #define TEST_CLASS SharedKeyTests
 
+	// region Kdf Hmac_Sha256
+
+	// data from botan: https://github.com/randombit/botan/blob/master/src/tests/data/kdf/sp800_56a.vec
+	// SP800-56A(HMAC(SHA-256))
+	TEST(TEST_CLASS, Kdf_Hmac_Sha256_Test_Vector_A) {
+		// Arrange:
+		auto salt = test::HexStringToVector("C767F6D57C1F68860197E6634B7D82C4");
+		auto sharedSecret = test::HexStringToVector("713E56305A7BD670FEA95F9E4E3D8B638DED29A3A674D5B64574A3CB996DEEFF");
+		auto label = test::HexStringToVector("40FA7C528A99EF7ADB4EF0737BD224DBD4398249B620C63F94343E829E6F7FD0");
+		auto expected = std::string("61D0E910F5275ABAAE6CD15897981A070FD90832C53416D60E5F390563B3DA235A");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		KdfSp800_56C_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	TEST(TEST_CLASS, Kdf_Hmac_Sha256_Test_Vector_B) {
+		// Arrange:
+		auto salt = test::HexStringToVector("C767F6D57C1F68860197E6634B7D82C4");
+		auto sharedSecret = test::HexStringToVector("E938C5A86E992A2D88C1DF74E356ED81D48D9E5835DB5E301EACB58E7B31501570E2B8656EDD0B7A");
+		auto label = test::HexStringToVector("48409EBDA7AA6E2F3897B1A24167CF2FBE7ED3E8AAF9B0F8ECAF55835DB4792A");
+		auto expected = std::string("5F572EA878EEAF814539073745828186091ECD5058B2C5D8494859E18FDB990F6DAB");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		KdfSp800_56C_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	TEST(TEST_CLASS, Kdf_Hmac_Sha256_Test_Vector_C) {
+		// Arrange:
+		auto salt = test::HexStringToVector("");
+		auto sharedSecret = test::HexStringToVector("A8863B7EB7CADD66C616DFEA7C646F0F507A37819F615A7229E80EC38C524971E1961211F024A976");
+		auto label = test::HexStringToVector("69F4C64716B4ED6ACA174C34E95AC10A1E9B710FE46A49FD44978101CB172BA6");
+		auto expected = std::string("6B9BDC2303195C79F2D831B19BDFB1E6074632C81F77247854155A3D595B4EEF");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		KdfSp800_56C_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	TEST(TEST_CLASS, Kdf_Hmac_Sha256_Test_Vector_D) {
+		// Arrange:
+		auto salt = test::HexStringToVector("00000000000000000000000000000000");
+		auto sharedSecret = test::HexStringToVector("A8863B7EB7CADD66C616DFEA7C646F0F507A37819F615A7229E80EC38C524971E1961211F024A976");
+		auto label = test::HexStringToVector("69F4C64716B4ED6ACA174C34E95AC10A1E9B710FE46A49FD44978101CB172BA6");
+		auto expected = std::string("6B9BDC2303195C79F2D831B19BDFB1E6074632C81F77247854155A3D595B4EEF");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		KdfSp800_56C_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	// endregion
+
 	TEST(TEST_CLASS, PassesTestVector) {
 		// Arrange: private key used is the one from KeyPairTests
 #ifdef SIGNATURE_SCHEME_KECCAK
