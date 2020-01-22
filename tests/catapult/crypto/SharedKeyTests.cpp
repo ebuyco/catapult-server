@@ -148,8 +148,7 @@ namespace catapult { namespace crypto {
 			Hkdf_Hmac_Sha256(secretVec, salt, expectedOutput, label);
 
 			// Act:
-			SharedKey sharedKey;
-			Hkdf_Hmac_Sha256_32(sharedSecret, sharedKey);
+			auto sharedKey = Hkdf_Hmac_Sha256_32(sharedSecret);
 
 			// Assert:
 			std::vector<uint8_t> sharedKeyVec(sharedKey.cbegin(), sharedKey.cend());
@@ -272,8 +271,7 @@ namespace catapult { namespace crypto {
 			KdfSp800_56C_Hmac_Sha256(secretVec, salt, expectedOutput, label);
 
 			// Act:
-			SharedKey sharedKey;
-			KdfSp800_56C_Hmac_Sha256_32(sharedSecret, sharedKey);
+			auto sharedKey = KdfSp800_56C_Hmac_Sha256_32(sharedSecret);
 
 			// Assert:
 			std::vector<uint8_t> sharedKeyVec(sharedKey.cbegin(), sharedKey.cend());
@@ -366,11 +364,12 @@ namespace catapult { namespace crypto {
 		});
 	}
 
-	TEST(TEST_CLASS, SharedKeysGeneratedWithDifferentSaltsAreDifferent) {
-		AssertDerivedSharedKeysAreDifferent([] (const auto&, const auto&, auto& salt) {
-			salt[0] ^= 0xFF;
-		});
-	}
+	// Salt is currently unused
+	// TEST(TEST_CLASS, SharedKeysGeneratedWithDifferentSaltsAreDifferent) {
+	// 	AssertDerivedSharedKeysAreDifferent([] (const auto&, const auto&, auto& salt) {
+	// 		salt[0] ^= 0xFF;
+	// 	});
+	// }
 
 	TEST(TEST_CLASS, MutualSharedKeysAreEqual) {
 		// Arrange:

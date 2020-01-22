@@ -59,7 +59,7 @@ extern "C" {
 
 namespace catapult { namespace crypto {
 
-	void Hkdf_Hmac_Sha256_32(const SharedSecret& sharedSecret, SharedKey& output) {
+	SharedKey Hkdf_Hmac_Sha256_32(const SharedSecret& sharedSecret) {
 		Hash256 zeroSalt;
 		Hash256 prk;
 		Hmac_Sha256(zeroSalt, sharedSecret, prk);
@@ -71,10 +71,12 @@ namespace catapult { namespace crypto {
 		Hash256 outputKeyingMaterial;
 		Hmac_Sha256(prk, buffer, outputKeyingMaterial);
 
-		std::memcpy(output.data(), outputKeyingMaterial.data(), Hash256::Size);
+		SharedKey sharedKey;
+		std::memcpy(sharedKey.data(), outputKeyingMaterial.data(), Hash256::Size);
+		return sharedKey;
 	}
 
-	void KdfSp800_56C_Hmac_Sha256_32(const SharedSecret& sharedSecret, SharedKey& output) {
+	SharedKey KdfSp800_56C_Hmac_Sha256_32(const SharedSecret& sharedSecret) {
 		constexpr auto Label_Length = 8;
 		std::array<uint8_t, Label_Length> label{ { 0x63, 0x61, 0x74, 0x61, 0x70, 0x75, 0x6c, 0x74 } };
 
@@ -85,10 +87,12 @@ namespace catapult { namespace crypto {
 		std::memcpy(&buffer[sizeof(uint32_t) + SharedSecret::Size], label.data(), Label_Length);
 
 		Hash256 zeroSalt;
-		Hash256 hash;
-		Hmac_Sha256(zeroSalt, buffer, hash);
+		Hash256 output;
+		Hmac_Sha256(zeroSalt, buffer, output);
 
-		std::memcpy(output.data(), hash.data(), Hash256::Size);
+		SharedKey sharedKey;
+		std::memcpy(sharedKey.data(), output.data(), Hash256::Size);
+		return sharedKey;
 	}
 
 	namespace {
@@ -244,7 +248,7 @@ namespace catapult { namespace crypto {
 
 		// endregion
 
-		bool ScalarMult(Hash256& saltedResult, const uint8_t (&multiplier)[32], const Key& publicKey) {
+		bool ScalarMult(SharedSecret& saltedResult, const uint8_t (&multiplier)[32], const Key& publicKey) {
 			// unpack public key
 			ge25519 A;
 			if (!ge25519_unpack_negative_vartime(&A, publicKey.data()))
@@ -291,8 +295,7 @@ namespace catapult { namespace crypto {
 		}
 	}
 
-	SharedKey DeriveSharedKey(const KeyPair& keyPair, const Key& otherPublicKey, const Salt& salt) {
-		// prepare for scalar multiply
+	SharedKey DeriveSharedKey(const KeyPair& keyPair, const Key& otherPublicKey, const Salt& /* salt */) {
 		Hash512 privHash;
 		HashPrivateKey(keyPair.privateKey(), privHash);
 
@@ -303,23 +306,10 @@ namespace catapult { namespace crypto {
 		uint8_t multiplier[32];
 		std::memcpy(multiplier, privHash.data(), Hash256::Size);
 
-		Hash256 saltedResult;
-		if (!ScalarMult(saltedResult, multiplier, otherPublicKey))
+		SharedSecret sharedSecret;
+		if (!ScalarMult(sharedSecret, multiplier, otherPublicKey))
 			return SharedKey();
 
-		// salt and hash
-		for (auto i = 0u; i < saltedResult.size(); ++i)
-			saltedResult[i] ^= salt[i];
-
-		Hash256 hash;
-#ifdef SIGNATURE_SCHEME_KECCAK
-		Keccak_256(saltedResult, hash);
-#else
-		Sha3_256(saltedResult, hash);
-#endif
-
-		SharedKey shared;
-		std::memcpy(shared.data(), hash.data(), SharedKey::Size);
-		return shared;
+		return Hkdf_Hmac_Sha256_32(sharedSecret);
 	}
 }}
