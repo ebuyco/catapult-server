@@ -28,6 +28,25 @@ namespace catapult { namespace crypto {
 
 #define TEST_CLASS SharedKeyTests
 
+	// region HKDF Sha256
+
+	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_A) {
+		// Arrange:
+		auto salt = test::HexStringToVector("000102030405060708090A0B0C");
+		auto sharedSecret = test::HexStringToVector("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B");
+		auto label = test::HexStringToVector("F0F1F2F3F4F5F6F7F8F9");
+		auto expected = std::string("3CB25F25FAACD57A90434F64D0362F2A2D2D0A90CF1A5A4C5DB02D56ECC4C5BF34007208D5B887185865");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	// endregion
+
 	// region Kdf Hmac_Sha256
 
 	// data from botan: https://github.com/randombit/botan/blob/master/src/tests/data/kdf/sp800_56a.vec

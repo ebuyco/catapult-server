@@ -32,6 +32,12 @@ namespace catapult { namespace crypto {
 	struct SharedKey_tag { static constexpr size_t Size = 32; };
 	using SharedKey = utils::ByteArray<SharedKey_tag>;
 
+	void Hkdf_Hmac_Sha256(
+			const  std::vector<uint8_t>& sharedSecret,
+			const std::vector<uint8_t>& salt,
+			std::vector<uint8_t>& output,
+			const std::vector<uint8_t>& label);
+
 	void KdfSp800_56C_Hmac_Sha256(
 			const std::vector<uint8_t>& sharedSecret,
 			const std::vector<uint8_t>& salt,

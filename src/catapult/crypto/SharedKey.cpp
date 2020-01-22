@@ -65,6 +65,48 @@ namespace catapult { namespace crypto {
 #define BSWAP(VAL) __builtin_bswap32(VAL)
 #endif
 
+	void Hkdf_Hmac_Sha256(
+			const  std::vector<uint8_t>& sharedSecret,
+			const std::vector<uint8_t>& salt,
+			std::vector<uint8_t>& output,
+			const std::vector<uint8_t>& label) {
+
+		Hash256 prk;
+		Hmac_Sha256(salt, sharedSecret, prk);
+
+		// T(i - 1) || label || counter
+		std::vector<uint8_t> buffer;
+		buffer.resize(Hash256::Size +  label.size() + sizeof(uint8_t));
+
+		size_t repetitions = (output.size() + Hash256::Size - 1) / Hash256::Size;
+		size_t position = 0;
+
+		// inline first iteration
+		uint32_t counter = 1;
+		std::memcpy(buffer.data(), label.data(), label.size());
+		std::memcpy(buffer.data() + label.size(), &counter, sizeof(uint8_t));
+
+		Hash256 previousOkm;
+		Hmac_Sha256(prk, { buffer.data(), label.size() + sizeof(uint8_t) }, previousOkm);
+
+		auto written = std::min(output.size() - position, Hash256::Size);
+		std::memcpy(&output[position], previousOkm.data(), written);
+		position += written;
+		++counter;
+
+		for (; counter <= repetitions; ++counter) {
+			std::memcpy(buffer.data(), previousOkm.data(), Hash256::Size);
+			std::memcpy(buffer.data() + Hash256::Size, label.data(), label.size());
+			std::memcpy(buffer.data() + Hash256::Size + label.size(), &counter, sizeof(uint8_t));
+
+			Hmac_Sha256(prk, buffer, previousOkm);
+
+			written = std::min(output.size() - position, Hash256::Size);
+			std::memcpy(&output[position], previousOkm.data(), written);
+			position += written;
+		}
+	}
+
 	void KdfSp800_56C_Hmac_Sha256(
 			const  std::vector<uint8_t>& sharedSecret,
 			const std::vector<uint8_t>& salt,
