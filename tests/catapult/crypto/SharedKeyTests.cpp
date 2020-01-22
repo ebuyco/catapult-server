@@ -29,13 +29,56 @@ namespace catapult { namespace crypto {
 #define TEST_CLASS SharedKeyTests
 
 	// region HKDF Sha256
+	// data taken from : RFC 5869
 
-	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_A) {
+	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_1) {
 		// Arrange:
 		auto salt = test::HexStringToVector("000102030405060708090A0B0C");
 		auto sharedSecret = test::HexStringToVector("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B");
 		auto label = test::HexStringToVector("F0F1F2F3F4F5F6F7F8F9");
 		auto expected = std::string("3CB25F25FAACD57A90434F64D0362F2A2D2D0A90CF1A5A4C5DB02D56ECC4C5BF34007208D5B887185865");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_2) {
+		// Arrange:
+		auto salt = test::HexStringToVector(
+				"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+				"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F"
+				"A0A1A2A3A4A5A6A7A8A9AAABACADAEAF");
+		auto sharedSecret = test::HexStringToVector(
+				"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F"
+				"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+				"404142434445464748494A4B4C4D4E4F");
+		auto label = test::HexStringToVector(
+				"B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFC0C1C2C3C4C5C6C7C8C9CACBCCCDCECF"
+				"D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF"
+				"F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF");
+		auto expected = std::string(
+				"B11E398DC80327A1C8E7F78C596A49344F012EDA2D4EFAD8A050CC4C19AFA97C"
+				"59045A99CAC7827271CB41C65E590E09DA3275600C2F09B8367793A9ACA3DB71"
+				"CC30C58179EC3E87C14C01D5C1F3434F1D87");
+
+		// Act:
+		std::vector<uint8_t> output(expected.size() / 2);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+
+		// Assert:
+		EXPECT_EQ(expected, test::ToHexString(output));
+	}
+
+	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_3) {
+		// Arrange:
+		auto salt = test::HexStringToVector("");
+		auto sharedSecret = test::HexStringToVector("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B");
+		auto label = test::HexStringToVector("");
+		auto expected = std::string("8DA4E775A563C18F715F802A063C5A31B8A11F5C5EE1879EC3454E5F3C738D2D9D201395FAA4B61A96C8");
 
 		// Act:
 		std::vector<uint8_t> output(expected.size() / 2);
