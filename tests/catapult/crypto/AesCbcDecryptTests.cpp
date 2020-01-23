@@ -192,7 +192,7 @@ namespace catapult { namespace crypto {
 	TEST(TEST_CLASS, Ed25199BlockCipher_ThrowsWhenEncryptedDataIsTooSmall) {
 		// Arrange:
 		auto keyPair = GenerateKeyPair();
-		auto saltedEncrypted = test::GenerateRandomVector(Salt::Size - 1);
+		auto saltedEncrypted = test::GenerateRandomVector(Key::Size - 1);
 
 		// Act + Assert:
 		std::vector<uint8_t> decrypted;
@@ -215,11 +215,11 @@ namespace catapult { namespace crypto {
 	}
 
 	TEST(TEST_CLASS, Ed25199BlockCipher_FailsWhenEncryptedDataDoesNotContainInitializationVector) {
-		AssertNotEnoughDataFailure(Salt::Size + AesInitializationVector::Size - 1);
+		AssertNotEnoughDataFailure(Key::Size + AesInitializationVector::Size - 1);
 	}
 
 	TEST(TEST_CLASS, Ed25199BlockCipher_FailsWhenEncryptedDataDoesNotContainPadding) {
-		AssertNotEnoughDataFailure(Salt::Size + AesInitializationVector::Size + 16 - 1);
+		AssertNotEnoughDataFailure(Key::Size + AesInitializationVector::Size + 16 - 1);
 	}
 
 	namespace {
@@ -243,12 +243,12 @@ namespace catapult { namespace crypto {
 	}
 
 	TEST(TEST_CLASS, Ed25199BlockCipher_CanDecryptEmptyMessage) {
-		AssertDecryptEd25199BlockCipher(0, Salt::Size + AesInitializationVector::Size + 16);
+		AssertDecryptEd25199BlockCipher(0, Key::Size + AesInitializationVector::Size + 16);
 	}
 
 	TEST(TEST_CLASS, Ed25199BlockCipher_CanDecryptMessage) {
 		// padding size = 16 - (123 % 16) = 5
-		AssertDecryptEd25199BlockCipher(123, Salt::Size + AesInitializationVector::Size + 123 + 5);
+		AssertDecryptEd25199BlockCipher(123, Key::Size + AesInitializationVector::Size + 123 + 5);
 	}
 
 	// endregion

@@ -76,9 +76,9 @@ namespace catapult { namespace test {
 		std::vector<uint8_t> encrypted;
 		AesCbcEncrypt(sharedKey, initializationVector, clearText, encrypted);
 
-		std::vector<uint8_t> saltedEncrypted(crypto::Salt::Size + encrypted.size());
+		std::vector<uint8_t> saltedEncrypted(Key::Size + encrypted.size());
 		std::memcpy(saltedEncrypted.data(), ephemeralKeyPair.publicKey().data(), Key::Size);
-		std::memcpy(saltedEncrypted.data() + crypto::Salt::Size, encrypted.data(), encrypted.size());
+		std::memcpy(saltedEncrypted.data() + Key::Size, encrypted.data(), encrypted.size());
 
 		return saltedEncrypted;
 	}

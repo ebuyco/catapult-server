@@ -23,9 +23,6 @@
 
 namespace catapult { namespace crypto {
 
-	struct Salt_tag { static constexpr size_t Size = 32; };
-	using Salt = utils::ByteArray<Salt_tag>;
-
 	struct SharedSecret_tag { static constexpr size_t Size = 32; };
 	using SharedSecret = utils::ByteArray<SharedSecret_tag>;
 

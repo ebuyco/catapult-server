@@ -41,7 +41,8 @@ namespace catapult { namespace harvesting {
 	}
 
 	size_t EncryptedUnlockedEntrySize() {
-		return crypto::Salt::Size
+		// ephemeral public key | aes cbc initialization vector | harvester key | padding
+		return Key::Size
 				+ crypto::AesInitializationVector::Size
 				+ Key::Size
 				+ Aes_Pkcs7_Padding_Size;
