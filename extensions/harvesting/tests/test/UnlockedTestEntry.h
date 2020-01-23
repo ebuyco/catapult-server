@@ -64,14 +64,6 @@ namespace catapult { namespace test {
 			const RawBuffer& entryBuffer,
 			EncryptionMutationFlag encryptionMutationFlag = EncryptionMutationFlag::None);
 
-	/// Creates encrypted unlocked entry around \a entryBuffer using \a recipientPublicKey and \a announcerPublicKey
-	/// with \a encryptionMutationFlag.
-	UnlockedTestEntry PrepareUnlockedTestEntry(
-			const Key& announcerPublicKey,
-			const Key& recipientPublicKey,
-			const RawBuffer& entryBuffer,
-			EncryptionMutationFlag encryptionMutationFlag = EncryptionMutationFlag::None);
-
 	/// Converts unlocked \a entry to buffer.
 	std::vector<uint8_t> ConvertUnlockedTestEntryToBuffer(const UnlockedTestEntry& entry);
 

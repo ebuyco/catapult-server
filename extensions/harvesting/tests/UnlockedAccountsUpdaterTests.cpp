@@ -73,7 +73,8 @@ namespace catapult { namespace harvesting {
 		public:
 			auto queueAddMessageWithHarvester(const Key& announcerPublicKey, const std::vector<uint8_t>& harvesterPrivateKeyBuffer) {
 				io::FileQueueWriter writer(m_dataDirectory.dir("transfer_message").str());
-				auto testEntry = test::PrepareUnlockedTestEntry(announcerPublicKey, m_keyPair.publicKey(), harvesterPrivateKeyBuffer);
+				auto testEntry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), harvesterPrivateKeyBuffer);
+				testEntry.Key = announcerPublicKey;
 
 				io::Write8(writer, utils::to_underlying_type(UnlockedEntryDirection::Add));
 				writer.write({ reinterpret_cast<const uint8_t*>(&testEntry), sizeof(testEntry) });
