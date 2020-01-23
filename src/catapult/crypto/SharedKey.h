@@ -32,9 +32,6 @@ namespace catapult { namespace crypto {
 	/// Generates HKDF of \a sharedSecret using default salt 0 and constant label: "catapult".
 	SharedKey Hkdf_Hmac_Sha256_32(const SharedSecret& sharedSecret);
 
-	/// Generates NIST SP 800-56C one-step KDF of \a sharedSecret using default salt 0 and constant label: "catapult".
-	SharedKey KdfSp800_56C_Hmac_Sha256_32(const SharedSecret& sharedSecret);
-
 	/// Generates shared key using \a keyPair and \a otherPublicKey.
 	/// \note: one of the keys must be ephemeral key.
 	SharedKey DeriveSharedKey(const KeyPair& keyPair, const Key& otherPublicKey);
