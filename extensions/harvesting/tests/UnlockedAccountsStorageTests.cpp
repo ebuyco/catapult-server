@@ -41,23 +41,23 @@ namespace catapult { namespace harvesting {
 			return test::GenerateRandomDataVector<Key>(numPrivateKeys);
 		}
 
-		auto PrepareEntries(const crypto::KeyPair& keyPair, const std::vector<Key>& privateKeyBuffers) {
+		auto PrepareEntries(const Key& recipientPublicKey, const std::vector<Key>& privateKeyBuffers) {
 			test::UnlockedTestEntries entries;
 			for (const auto& privateKeyBuffer : privateKeyBuffers) {
-				auto entry = test::PrepareUnlockedTestEntry(keyPair.publicKey(), privateKeyBuffer);
+				auto entry = test::PrepareUnlockedTestEntry(recipientPublicKey, privateKeyBuffer);
 				entries.emplace(entry);
 			}
 
 			return entries;
 		}
 
-		auto PrepareEntries(const crypto::KeyPair& keyPair, size_t numEntries) {
-			return PrepareEntries(keyPair, GeneratePrivateKeyBuffers(numEntries));
+		auto PrepareEntries(const Key& recipientPublicKey, size_t numEntries) {
+			return PrepareEntries(recipientPublicKey, GeneratePrivateKeyBuffers(numEntries));
 		}
 
 		auto PrepareEntries(size_t numEntries) {
 			auto keyPair = test::GenerateKeyPair();
-			return PrepareEntries(keyPair, numEntries);
+			return PrepareEntries(keyPair.publicKey(), numEntries);
 		}
 
 		void AssertFileSize(const std::string& filename, size_t expectedSize) {
@@ -548,7 +548,7 @@ namespace catapult { namespace harvesting {
 		test::TempFileGuard guard(Filename);
 		auto keyPair = test::GenerateKeyPair();
 		auto privateKeyBuffers = GeneratePrivateKeyBuffers(3);
-		auto entries = PrepareEntries(keyPair, privateKeyBuffers);
+		auto entries = PrepareEntries(keyPair.publicKey(), privateKeyBuffers);
 		for (const auto& entry : entries)
 			AppendUnlockedEntryToFile(guard.name(), entry);
 
