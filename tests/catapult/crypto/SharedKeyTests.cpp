@@ -85,7 +85,7 @@ namespace catapult { namespace crypto {
 		auto expected = test::HexStringToVector("3CB25F25FAACD57A90434F64D0362F2A2D2D0A90CF1A5A4C5DB02D56ECC4C5BF34007208D5B887185865");
 
 		// Act:
-		std::vector<uint8_t> output(expected.size() / 2);
+		std::vector<uint8_t> output(expected.size());
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
@@ -112,7 +112,7 @@ namespace catapult { namespace crypto {
 				"CC30C58179EC3E87C14C01D5C1F3434F1D87");
 
 		// Act:
-		std::vector<uint8_t> output(expected.size() / 2);
+		std::vector<uint8_t> output(expected.size());
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
@@ -127,7 +127,7 @@ namespace catapult { namespace crypto {
 		auto expected = test::HexStringToVector("8DA4E775A563C18F715F802A063C5A31B8A11F5C5EE1879EC3454E5F3C738D2D9D201395FAA4B61A96C8");
 
 		// Act:
-		std::vector<uint8_t> output(expected.size() / 2);
+		std::vector<uint8_t> output(expected.size());
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
