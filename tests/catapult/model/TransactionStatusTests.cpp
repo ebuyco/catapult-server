@@ -29,13 +29,13 @@ namespace catapult { namespace model {
 	TEST(TEST_CLASS, CanCreateTransactionStatus) {
 		// Arrange + Act:
 		Hash256 hash = test::GenerateRandomByteArray<Hash256>();
-		TransactionStatus result(hash, 123, Timestamp(234));
+		TransactionStatus result(hash, Timestamp(234), 123);
 
 		// Assert:
 		EXPECT_EQ(Hash256::Size + sizeof(uint32_t) + sizeof(Timestamp), sizeof(result));
 		EXPECT_EQ(hash, result.Hash);
-		EXPECT_EQ(123u, result.Status);
 		EXPECT_EQ(Timestamp(234), result.Deadline);
+		EXPECT_EQ(123u, result.Status);
 	}
 
 	// region equality operators
@@ -45,11 +45,11 @@ namespace catapult { namespace model {
 			auto hash1 = test::GenerateRandomByteArray<Hash256>();
 			auto hash2 = test::GenerateRandomByteArray<Hash256>();
 			return {
-				{ "default", TransactionStatus(hash1, 123, Timestamp(234)) },
-				{ "copy", TransactionStatus(hash1, 123, Timestamp(234)) },
-				{ "diff-hash", TransactionStatus(hash2, 123, Timestamp(234)) },
-				{ "diff-status", TransactionStatus(hash1, 234, Timestamp(234)) },
-				{ "diff-deadline", TransactionStatus(hash1, 123, Timestamp(345)) }
+				{ "default", TransactionStatus(hash1, Timestamp(234), 123) },
+				{ "copy", TransactionStatus(hash1, Timestamp(234), 123) },
+				{ "diff-hash", TransactionStatus(hash2, Timestamp(234), 123) },
+				{ "diff-status", TransactionStatus(hash1, Timestamp(234), 234) },
+				{ "diff-deadline", TransactionStatus(hash1, Timestamp(345), 123) }
 			};
 		}
 
