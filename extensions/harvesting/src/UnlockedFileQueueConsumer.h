@@ -56,9 +56,7 @@ namespace catapult { namespace harvesting {
 	size_t EncryptedUnlockedEntrySize();
 
 	/// Decrypts \a saltedEncrypted using \a bootKeyPair and \a publicKey.
-	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(
-			const RawBuffer& saltedEncrypted,
-			const crypto::KeyPair& bootKeyPair);
+	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(const RawBuffer& saltedEncrypted, const crypto::KeyPair& bootKeyPair);
 
 	/// Reads encrypted unlocked entry messages from \a directory, validates using \a bootKeyPair and forwards to \a processEntryKeyPair.
 	void UnlockedFileQueueConsumer(

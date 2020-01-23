@@ -48,9 +48,7 @@ namespace catapult { namespace harvesting {
 				+ Aes_Pkcs7_Padding_Size;
 	}
 
-	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(
-			const RawBuffer& saltedEncrypted,
-			const crypto::KeyPair& bootKeyPair) {
+	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(const RawBuffer& saltedEncrypted, const crypto::KeyPair& bootKeyPair) {
 		std::vector<uint8_t> decrypted;
 		if (!crypto::TryDecryptEd25199BlockCipher(saltedEncrypted, bootKeyPair, decrypted) || Key::Size != decrypted.size())
 			return std::make_pair(crypto::PrivateKey(), false);

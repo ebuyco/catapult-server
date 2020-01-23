@@ -72,10 +72,7 @@ namespace catapult { namespace crypto {
 		}
 	}
 
-	bool TryDecryptEd25199BlockCipher(
-			const RawBuffer& saltedEncrypted,
-			const KeyPair& keyPair,
-			std::vector<uint8_t>& decrypted) {
+	bool TryDecryptEd25199BlockCipher(const RawBuffer& saltedEncrypted, const KeyPair& keyPair, std::vector<uint8_t>& decrypted) {
 		if (Key::Size > saltedEncrypted.Size)
 			CATAPULT_THROW_INVALID_ARGUMENT("encrypted data is not salted");
 

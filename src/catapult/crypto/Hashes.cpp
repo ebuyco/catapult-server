@@ -103,7 +103,7 @@ namespace catapult { namespace crypto {
 		using Sha256_Block = utils::ByteArray<Sha256_Block_tag>;
 	}
 
-	void Hmac_Sha256(const RawBuffer& key,  const RawBuffer& input, Hash256& output) {
+	void Hmac_Sha256(const RawBuffer& key, const RawBuffer& input, Hash256& output) {
 		crypto_hash_sha256_state state;
 		// zero-initialized by default
 		Sha256_Block innerKeyPad;

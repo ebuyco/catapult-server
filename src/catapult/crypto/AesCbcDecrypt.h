@@ -30,8 +30,5 @@ namespace catapult { namespace crypto {
 	bool TryAesCbcDecrypt(const SharedKey& key, const RawBuffer& input, std::vector<uint8_t>& output);
 
 	/// Extracts ephemeral public key from \a saltedEncrypted and decrypts rest to \a decrypted using \a keyPair.
-	bool TryDecryptEd25199BlockCipher(
-			const RawBuffer& saltedEncrypted,
-			const KeyPair& keyPair,
-			std::vector<uint8_t>& decrypted);
+	bool TryDecryptEd25199BlockCipher(const RawBuffer& saltedEncrypted, const KeyPair& keyPair, std::vector<uint8_t>& decrypted);
 }}

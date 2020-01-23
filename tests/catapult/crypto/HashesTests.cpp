@@ -475,24 +475,24 @@ namespace catapult { namespace crypto {
 
 	// data from: https://github.com/randombit/botan/blob/master/src/tests/data/mac/hmac.vec
 
-	TEST(Hmac_Sha256, SampleTestVector_1) {
+	TEST(TEST_CLASS, Hmac_Sha256_SampleTestVector_1) {
 		// Arrange:
 		auto key = test::HexStringToVector("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20");
-		auto data = test::HexStringToVector("616263");
+		auto buffer = test::HexStringToVector("616263");
 		Hash256 output;
 
 		// Act:
-		Hmac_Sha256(key, data, output);
+		Hmac_Sha256(key, buffer, output);
 
 		// Assert:
 		auto expected = std::string("A21B1F5D4CF4F73A4DD939750F7A066A7F98CC131CB16A6692759021CFAB8181");
 		EXPECT_EQ(utils::ParseByteArray<Hash256>(expected), output);
 	}
 
-	TEST(Hmac_Sha256, SampleTestVector_3) {
+	TEST(TEST_CLASS, Hmac_Sha256_SampleTestVector_3) {
 		// Arrange:
 		auto key = test::HexStringToVector("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20");
-		auto data = test::HexStringToVector(
+		auto buffer = test::HexStringToVector(
 				"6162636462636465636465666465666765666768666768696768696A68696A6B"
 				"696A6B6C6A6B6C6D6B6C6D6E6C6D6E6F6D6E6F706E6F70716162636462636465"
 				"636465666465666765666768666768696768696A68696A6B696A6B6C6A6B6C6D"
@@ -500,7 +500,7 @@ namespace catapult { namespace crypto {
 		Hash256 output;
 
 		// Act:
-		Hmac_Sha256(key, data, output);
+		Hmac_Sha256(key, buffer, output);
 
 		// Assert:
 		auto expected = std::string("470305FC7E40FE34D3EEB3E773D95AAB73ACF0FD060447A5EB4595BF33A9D1A3");

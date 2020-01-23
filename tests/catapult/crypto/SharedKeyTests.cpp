@@ -33,10 +33,9 @@ namespace catapult { namespace crypto {
 	// data taken from : RFC 5869
 
 	namespace {
-
 		// generic implementation to check test vectors
 		void Hkdf_Hmac_Sha256(
-				const  std::vector<uint8_t>& sharedSecret,
+				const std::vector<uint8_t>& sharedSecret,
 				const std::vector<uint8_t>& salt,
 				std::vector<uint8_t>& output,
 				const std::vector<uint8_t>& label) {
@@ -46,7 +45,7 @@ namespace catapult { namespace crypto {
 
 			// T(i - 1) || label || counter
 			std::vector<uint8_t> buffer;
-			buffer.resize(Hash256::Size +  label.size() + sizeof(uint8_t));
+			buffer.resize(Hash256::Size + label.size() + sizeof(uint8_t));
 
 			size_t repetitions = (output.size() + Hash256::Size - 1) / Hash256::Size;
 			size_t position = 0;
@@ -83,14 +82,14 @@ namespace catapult { namespace crypto {
 		auto salt = test::HexStringToVector("000102030405060708090A0B0C");
 		auto sharedSecret = test::HexStringToVector("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B");
 		auto label = test::HexStringToVector("F0F1F2F3F4F5F6F7F8F9");
-		auto expected = std::string("3CB25F25FAACD57A90434F64D0362F2A2D2D0A90CF1A5A4C5DB02D56ECC4C5BF34007208D5B887185865");
+		auto expected = test::HexStringToVector("3CB25F25FAACD57A90434F64D0362F2A2D2D0A90CF1A5A4C5DB02D56ECC4C5BF34007208D5B887185865");
 
 		// Act:
 		std::vector<uint8_t> output(expected.size() / 2);
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
-		EXPECT_EQ(expected, test::ToHexString(output));
+		EXPECT_EQ(expected, output);
 	}
 
 	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_2) {
@@ -107,7 +106,7 @@ namespace catapult { namespace crypto {
 				"B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBFC0C1C2C3C4C5C6C7C8C9CACBCCCDCECF"
 				"D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF"
 				"F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF");
-		auto expected = std::string(
+		auto expected = test::HexStringToVector(
 				"B11E398DC80327A1C8E7F78C596A49344F012EDA2D4EFAD8A050CC4C19AFA97C"
 				"59045A99CAC7827271CB41C65E590E09DA3275600C2F09B8367793A9ACA3DB71"
 				"CC30C58179EC3E87C14C01D5C1F3434F1D87");
@@ -117,7 +116,7 @@ namespace catapult { namespace crypto {
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
-		EXPECT_EQ(expected, test::ToHexString(output));
+		EXPECT_EQ(expected, output);
 	}
 
 	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_Test_Vector_3) {
@@ -125,14 +124,14 @@ namespace catapult { namespace crypto {
 		auto salt = test::HexStringToVector("");
 		auto sharedSecret = test::HexStringToVector("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B");
 		auto label = test::HexStringToVector("");
-		auto expected = std::string("8DA4E775A563C18F715F802A063C5A31B8A11F5C5EE1879EC3454E5F3C738D2D9D201395FAA4B61A96C8");
+		auto expected = test::HexStringToVector("8DA4E775A563C18F715F802A063C5A31B8A11F5C5EE1879EC3454E5F3C738D2D9D201395FAA4B61A96C8");
 
 		// Act:
 		std::vector<uint8_t> output(expected.size() / 2);
 		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
 
 		// Assert:
-		EXPECT_EQ(expected, test::ToHexString(output));
+		EXPECT_EQ(expected, output);
 	}
 
 	TEST(TEST_CLASS, Hkdf_Hmac_Sha256_32_Tests) {
@@ -179,8 +178,7 @@ namespace catapult { namespace crypto {
 
 		// Assert:
 		EXPECT_EQ(expectedSharedKey, sharedKey);
-	}
-	*/
+	} */
 
 	namespace {
 		auto CreateKeyPair(const Key& privateKey) {
@@ -188,9 +186,7 @@ namespace catapult { namespace crypto {
 			return KeyPair::FromPrivate(PrivateKey::Generate([&privateKey, &index]() { return privateKey[index++]; }));
 		}
 
-		void AssertDeriveSharedKey(
-				const consumer<Key&, Key&>& mutate,
-				const consumer<const SharedKey&, const SharedKey&>& assertKeys) {
+		void AssertDeriveSharedKey(const consumer<Key&, Key&>& mutate, const consumer<const SharedKey&, const SharedKey&>& assertKeys) {
 			// Arrange: the public key needs to be valid, else unpacking will fail
 			auto privateKey1 = test::GenerateRandomByteArray<Key>();
 			auto otherPublicKey1 = test::GenerateKeyPair().publicKey();

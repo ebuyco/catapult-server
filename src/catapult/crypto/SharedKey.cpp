@@ -66,7 +66,7 @@ namespace catapult { namespace crypto {
 
 		// specialized for single repetition, last byte contains counter value
 		constexpr auto Buffer_Length = 8 + 1;
-		std::array<uint8_t, Buffer_Length> buffer{ { 0x63, 0x61, 0x74, 0x61, 0x70, 0x75, 0x6c, 0x74, 0x01 } };
+		std::array<uint8_t, Buffer_Length> buffer{ { 0x63, 0x61, 0x74, 0x61, 0x70, 0x75, 0x6C, 0x74, 0x01 } };
 
 		Hash256 outputKeyingMaterial;
 		Hmac_Sha256(prk, buffer, outputKeyingMaterial);

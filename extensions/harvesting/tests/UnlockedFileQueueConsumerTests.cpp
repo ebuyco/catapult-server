@@ -174,7 +174,7 @@ namespace catapult { namespace harvesting {
 
 				std::vector<uint8_t> randomPrivateBuffer(randomPrivate.cbegin(), randomPrivate.cend());
 				randomPrivateBuffer.resize(randomPrivateBuffer.size() + 1);
-				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), randomPrivateBuffer, test::EncryptionMutationFlag::None);
+				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), randomPrivateBuffer);
 				return entryToMessage(entry);
 			}
 
