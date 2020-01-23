@@ -20,11 +20,39 @@
 
 #include "catapult/model/TransactionStatus.h"
 #include "tests/test/nodeps/Equality.h"
+#include "tests/test/nodeps/Alignment.h"
 #include "tests/TestHarness.h"
 
 namespace catapult { namespace model {
 
 #define TEST_CLASS TransactionStatusTests
+
+	// region size + alignment
+
+#define TRANSACTION_STATUS_FIELDS FIELD(Hash) FIELD(Deadline) FIELD(Status)
+
+	TEST(TEST_CLASS, TransactionStatusHasExpectedSize) {
+		// Arrange:
+		auto expectedSize = 0u;
+
+#define FIELD(X) expectedSize += sizeof(TransactionStatus::X);
+		TRANSACTION_STATUS_FIELDS
+#undef FIELD
+
+		// Assert:
+		EXPECT_EQ(expectedSize, sizeof(TransactionStatus));
+		EXPECT_EQ(44u, sizeof(TransactionStatus));
+	}
+
+	TEST(TEST_CLASS, TransactionStatusHasProperAlignment) {
+#define FIELD(X) EXPECT_ALIGNED(TransactionStatus, X);
+		TRANSACTION_STATUS_FIELDS
+#undef FIELD
+	}
+
+	// endregion
+
+	// region constructor
 
 	TEST(TEST_CLASS, CanCreateTransactionStatus) {
 		// Arrange + Act:
@@ -37,6 +65,8 @@ namespace catapult { namespace model {
 		EXPECT_EQ(Timestamp(234), result.Deadline);
 		EXPECT_EQ(123u, result.Status);
 	}
+
+	// endregion
 
 	// region equality operators
 
