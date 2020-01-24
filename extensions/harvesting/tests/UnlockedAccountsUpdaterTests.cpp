@@ -72,11 +72,10 @@ namespace catapult { namespace harvesting {
 
 		public:
 			auto queueAddMessageWithHarvester(
-					const UnlockedEntryMessageIdentifier& messageIdentifier,
+					const crypto::KeyPair& ephemeralKeyPair,
 					const std::vector<uint8_t>& harvesterPrivateKeyBuffer) {
 				io::FileQueueWriter writer(m_dataDirectory.dir("transfer_message").str());
-				auto testEntry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), harvesterPrivateKeyBuffer);
-				testEntry.Identifier = messageIdentifier;
+				auto testEntry = test::PrepareUnlockedTestEntry(ephemeralKeyPair, m_keyPair.publicKey(), harvesterPrivateKeyBuffer);
 
 				io::Write8(writer, utils::to_underlying_type(UnlockedEntryDirection::Add));
 				writer.write({ reinterpret_cast<const uint8_t*>(&testEntry), sizeof(testEntry) });
@@ -85,9 +84,7 @@ namespace catapult { namespace harvesting {
 			}
 
 			auto queueAddMessageWithHarvester(const std::vector<uint8_t>& harvesterPrivateKeyBuffer) {
-				return queueAddMessageWithHarvester(
-						test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>(),
-						harvesterPrivateKeyBuffer);
+				return queueAddMessageWithHarvester(test::GenerateKeyPair(), harvesterPrivateKeyBuffer);
 			}
 
 			void queueRemoveMessage(const test::UnlockedTestEntry& testEntry) {
@@ -396,10 +393,10 @@ namespace catapult { namespace harvesting {
 		context.addEnabledAccount(randomPrivateBuffer3);
 
 		// - prepare and process non-consecutive entries with same announcer
-		auto messageIdentifier = test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>();
-		auto entry1 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		auto ephemeralKeyPair = test::GenerateKeyPair();
+		auto entry1 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 		auto entry2 = context.queueAddMessageWithHarvester(randomPrivateBuffer2);
-		context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer3);
+		context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer3);
 
 		// Sanity:
 		EXPECT_EQ(1u, context.numUnlockedAccounts());
@@ -423,10 +420,10 @@ namespace catapult { namespace harvesting {
 		context.addEnabledAccount(randomPrivateBuffer3);
 
 		// - prepare and process non-consecutive entries with same announcer
-		auto messageIdentifier = test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>();
-		auto entry1 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		auto ephemeralKeyPair = test::GenerateKeyPair();
+		auto entry1 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 		auto entry2 = context.queueAddMessageWithHarvester(randomPrivateBuffer2);
-		auto entry3 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer3);
+		auto entry3 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer3);
 		context.update();
 
 		// Sanity:
@@ -472,10 +469,10 @@ namespace catapult { namespace harvesting {
 		context.addEnabledAccount(randomPrivateBuffer2);
 
 		// - prepare and process non-consecutive entries with same announcer and harvester
-		auto messageIdentifier = test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>();
-		auto entry1 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		auto ephemeralKeyPair = test::GenerateKeyPair();
+		auto entry1 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 		auto entry2 = context.queueAddMessageWithHarvester(randomPrivateBuffer2);
-		context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 
 		// Sanity:
 		EXPECT_EQ(1u, context.numUnlockedAccounts());
@@ -497,10 +494,10 @@ namespace catapult { namespace harvesting {
 		context.addEnabledAccount(randomPrivateBuffer2);
 
 		// - prepare and process non-consecutive entries with same announcer and harvester
-		auto messageIdentifier = test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>();
-		auto entry1 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		auto ephemeralKeyPair = test::GenerateKeyPair();
+		auto entry1 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 		auto entry2 = context.queueAddMessageWithHarvester(randomPrivateBuffer2);
-		auto entry3 = context.queueAddMessageWithHarvester(messageIdentifier, randomPrivateBuffer1);
+		auto entry3 = context.queueAddMessageWithHarvester(ephemeralKeyPair, randomPrivateBuffer1);
 		context.update();
 
 		// Sanity:

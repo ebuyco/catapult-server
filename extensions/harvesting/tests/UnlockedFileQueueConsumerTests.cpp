@@ -32,15 +32,6 @@ namespace catapult { namespace harvesting {
 
 #define TEST_CLASS UnlockedFileQueueConsumerTests
 
-	// region alignment (UnlockedEntryMessage)
-
-	TEST(TEST_CLASS, UnlockedEntryMessageHasProperAlignment) {
-		// Assert: AnnouncerPublicKey needs to be 8-byte aligned, which is not guaranteed even though `UnlockedEntryMessage` is not packed
-		EXPECT_ALIGNED(UnlockedEntryMessage, AnnouncerPublicKey);
-	}
-
-	// endregion
-
 	// region EncryptedUnlockedEntrySize / GetMessageIdentifier
 
 	TEST(TEST_CLASS, CanGetEncryptedUnlockedEntrySize) {
@@ -49,15 +40,16 @@ namespace catapult { namespace harvesting {
 
 	TEST(TEST_CLASS, CanGetMessageIdentifierFromMessage) {
 		// Arrange:
+		auto expectedMessageIdentifier = test::GenerateRandomByteArray<UnlockedEntryMessageIdentifier>();
+
 		UnlockedEntryMessage message;
-		message.AnnouncerPublicKey = test::GenerateRandomByteArray<Key>();
+		message.EncryptedEntry = RawBuffer{ expectedMessageIdentifier.data(), expectedMessageIdentifier.size() };
 
 		// Act:
 		auto messageIdentifier = GetMessageIdentifier(message);
 
 		// Assert:
-		EXPECT_EQ(message.AnnouncerPublicKey.size(), messageIdentifier.size());
-		EXPECT_EQ_MEMORY(message.AnnouncerPublicKey.data(), messageIdentifier.data(), messageIdentifier.size());
+		EXPECT_EQ(expectedMessageIdentifier, messageIdentifier);
 	}
 
 	// endregion
@@ -115,10 +107,9 @@ namespace catapult { namespace harvesting {
 		}
 
 		auto SerializeUnlockedEntryMessage(const UnlockedEntryMessage& message) {
-			std::vector<uint8_t> announcerEntryPair(1 + Key::Size + message.EncryptedEntry.Size);
+			std::vector<uint8_t> announcerEntryPair(1 + message.EncryptedEntry.Size);
 			announcerEntryPair[0] = static_cast<uint8_t>(message.Direction);
-			std::memcpy(announcerEntryPair.data() + 1, message.AnnouncerPublicKey.data(), message.AnnouncerPublicKey.size());
-			std::memcpy(announcerEntryPair.data() + 1 + Key::Size, message.EncryptedEntry.pData, message.EncryptedEntry.Size);
+			std::memcpy(announcerEntryPair.data() + 1, message.EncryptedEntry.pData, message.EncryptedEntry.Size);
 			return announcerEntryPair;
 		}
 
@@ -165,7 +156,7 @@ namespace catapult { namespace harvesting {
 			enum class Sizes { Underflow, Normal, Overflow };
 
 			auto prepareMessage(const Key& randomPrivate, test::EncryptionMutationFlag encryptionMutationFlag) {
-				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), RawBuffer{randomPrivate}, encryptionMutationFlag);
+				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), RawBuffer{ randomPrivate }, encryptionMutationFlag);
 				return entryToMessage(entry);
 			}
 

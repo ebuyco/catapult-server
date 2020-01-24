@@ -73,7 +73,7 @@ namespace catapult { namespace harvesting {
 			auto entries = PrepareEntries(numNewEntries);
 
 			for (const auto& entry : entries)
-				EXPECT_NO_THROW(storage.add(entry.Identifier, entry.Payload, test::GenerateRandomByteArray<Key>()));
+				EXPECT_NO_THROW(storage.add(test::GetMessageIdentifier(entry), entry.Payload, test::GenerateRandomByteArray<Key>()));
 
 			// Sanity:
 			AssertFileSize(filename, (numNewEntries + numInitialEntries) * sizeof(test::UnlockedTestEntry));
@@ -93,7 +93,7 @@ namespace catapult { namespace harvesting {
 
 		// Act + Assert:
 		for (const auto& entry : entries)
-			EXPECT_TRUE(storage.contains(entry.Identifier));
+			EXPECT_TRUE(storage.contains(test::GetMessageIdentifier(entry)));
 	}
 
 	TEST(TEST_CLASS, ContainsReturnsFalseForUnknownIdentifier) {
@@ -146,7 +146,7 @@ namespace catapult { namespace harvesting {
 
 		// Act:
 		for (const auto& entry : entries)
-			EXPECT_NO_THROW(storage.add(entry.Identifier, entry.Payload, harvesterPublicKey));
+			EXPECT_NO_THROW(storage.add(test::GetMessageIdentifier(entry), entry.Payload, harvesterPublicKey));
 
 		// Assert:
 		test::AssertUnlockedEntriesFileContents(guard.name(), entries);
@@ -160,8 +160,10 @@ namespace catapult { namespace harvesting {
 		auto entry2 = entry1;
 
 		// Act:
-		EXPECT_NO_THROW(storage.add(entry1.Identifier, entry1.Payload, test::GenerateRandomByteArray<Key>()));
-		EXPECT_THROW(storage.add(entry2.Identifier, entry2.Payload, test::GenerateRandomByteArray<Key>()), catapult_invalid_argument);
+		EXPECT_NO_THROW(storage.add(test::GetMessageIdentifier(entry1), entry1.Payload, test::GenerateRandomByteArray<Key>()));
+		EXPECT_THROW(
+				storage.add(test::GetMessageIdentifier(entry2), entry2.Payload, test::GenerateRandomByteArray<Key>()),
+				catapult_invalid_argument);
 
 		// Assert: the second entry with a duplicate announcer was not added
 		test::AssertUnlockedEntriesFileContents(guard.name(), { entry1 });
@@ -183,7 +185,7 @@ namespace catapult { namespace harvesting {
 			EXPECT_TRUE(boost::filesystem::exists(guard.name()));
 
 			// Act + Assert:
-			EXPECT_THROW(storage.remove(entries.cbegin()->Identifier), catapult_runtime_error);
+			EXPECT_THROW(storage.remove(test::GetMessageIdentifier(*entries.cbegin())), catapult_runtime_error);
 		}
 	}
 
@@ -203,7 +205,7 @@ namespace catapult { namespace harvesting {
 		boost::filesystem::remove(guard.name());
 
 		// Sanity:
-		const auto& messageIdentifier = entries.cbegin()->Identifier;
+		auto messageIdentifier = test::GetMessageIdentifier(*entries.cbegin());
 		EXPECT_TRUE(storage.contains(messageIdentifier));
 		EXPECT_FALSE(boost::filesystem::exists(guard.name()));
 
@@ -223,7 +225,7 @@ namespace catapult { namespace harvesting {
 		boost::filesystem::resize_file(guard.name(), 2 * sizeof(test::UnlockedTestEntry));
 
 		// Sanity:
-		const auto& messageIdentifier = (--entries.cend())->Identifier;
+		auto messageIdentifier = test::GetMessageIdentifier(*--entries.cend());
 		EXPECT_TRUE(storage.contains(messageIdentifier));
 		AssertFileSize(guard.name(), 2 * sizeof(test::UnlockedTestEntry));
 
@@ -242,8 +244,8 @@ namespace catapult { namespace harvesting {
 		auto entries = SeedEntries(storage, guard.name(), 3);
 
 		// Sanity:
-		const auto& messageIdentifier2 = (++entries.cbegin())->Identifier;
-		const auto& messageIdentifier3 = (++++entries.cbegin())->Identifier;
+		auto messageIdentifier2 = test::GetMessageIdentifier(*++entries.cbegin());
+		auto messageIdentifier3 = test::GetMessageIdentifier(*++++entries.cbegin());
 		EXPECT_TRUE(storage.contains(messageIdentifier2));
 		EXPECT_TRUE(storage.contains(messageIdentifier3));
 		AssertFileSize(guard.name(), 3 * sizeof(test::UnlockedTestEntry));
@@ -281,7 +283,7 @@ namespace catapult { namespace harvesting {
 
 		// Act:
 		for (auto iter = entries.crbegin(); entries.crend() != iter; ++iter)
-			storage.remove(iter->Identifier);
+			storage.remove(test::GetMessageIdentifier(*iter));
 
 		// Assert:
 		test::AssertUnlockedEntriesFileContents(guard.name(), {});
@@ -296,7 +298,7 @@ namespace catapult { namespace harvesting {
 
 		// Act:
 		for (auto iter = entriesNew.crbegin(); entriesNew.crend() != iter; ++iter)
-			storage.remove(iter->Identifier);
+			storage.remove(test::GetMessageIdentifier(*iter));
 
 		// Assert:
 		test::AssertUnlockedEntriesFileContents(guard.name(), entries);
@@ -344,8 +346,8 @@ namespace catapult { namespace harvesting {
 			auto i = 0u;
 			for (const auto& entry : entries) {
 				harvesterPublicKey[0] = static_cast<uint8_t>(i + 1);
-				storage.add(entry.Identifier, entry.Payload, harvesterPublicKey);
-				identifierToHarvester.emplace(entry.Identifier, harvesterPublicKey);
+				storage.add(test::GetMessageIdentifier(entry), entry.Payload, harvesterPublicKey);
+				identifierToHarvester.emplace(test::GetMessageIdentifier(entry), harvesterPublicKey);
 				++i;
 			}
 
@@ -419,7 +421,7 @@ namespace catapult { namespace harvesting {
 		test::UnlockedTestEntries expectedEntries;
 		std::copy_if(entries.cbegin(), entries.cend(), std::inserter(expectedEntries, expectedEntries.end()), [&identifierToHarvester](
 				const auto& entry) {
-			const auto& harvesterPublicKey = identifierToHarvester[entry.Identifier];
+			const auto& harvesterPublicKey = identifierToHarvester[test::GetMessageIdentifier(entry)];
 			return harvesterPublicKey[0] & 1;
 		});
 
@@ -473,7 +475,7 @@ namespace catapult { namespace harvesting {
 		// - remove two most recent entries
 		auto reverseIter = originalEntries.crbegin();
 		for (int i = 0; i < 2; ++i) {
-			storage.remove(reverseIter->Identifier);
+			storage.remove(test::GetMessageIdentifier(*reverseIter));
 			++reverseIter;
 		}
 

@@ -31,9 +31,9 @@ namespace catapult { namespace harvesting {
 	/// Unlocked accounts storage.
 	class UnlockedAccountsStorage {
 	private:
-		using AnnouncerToEntryMap = std::map<UnlockedEntryMessageIdentifier, std::vector<uint8_t>>;
-		using AccountEntryPair = AnnouncerToEntryMap::value_type;
-		using EntryToHarvesterMap = std::map<AccountEntryPair, Key>;
+		using IdentityToEntryMap = std::map<UnlockedEntryMessageIdentifier, std::vector<uint8_t>>;
+		using IdentityEntryPair = IdentityToEntryMap::value_type;
+		using EntryToHarvesterMap = std::map<IdentityEntryPair, Key>;
 
 	public:
 		/// Creates unlocked accounts storage around \a filename.
@@ -66,7 +66,7 @@ namespace catapult { namespace harvesting {
 
 	private:
 		std::string m_filename;
-		AnnouncerToEntryMap m_announcerToEntryMap;
+		IdentityToEntryMap m_identityToEntryMap;
 		EntryToHarvesterMap m_entryToHarvesterMap;
 	};
 }}

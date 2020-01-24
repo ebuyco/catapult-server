@@ -33,18 +33,18 @@ namespace catapult { namespace test {
 #pragma pack(push, 1)
 	/// Unlocked test entry.
 	struct UnlockedTestEntry {
-		/// Message identifier.
-		harvesting::UnlockedEntryMessageIdentifier Identifier;
-
 		/// Encrypted unlocked entry.
 		std::array<uint8_t, Unlocked_Test_Entry_Payload_Size> Payload;
 
 		/// Returns \c true if this unlocked test entry is equal to \a rhs.
 		bool operator==(const UnlockedTestEntry& rhs) const {
-			return Identifier == rhs.Identifier && Payload == rhs.Payload;
+			return Payload == rhs.Payload;
 		}
 	};
 #pragma pack(pop)
+
+	/// Gets a unique idenfifier for \a entry.
+	harvesting::UnlockedEntryMessageIdentifier GetMessageIdentifier(const UnlockedTestEntry& entry);
 
 	/// Insertion operator for outputting \a entry to \a out.
 	std::ostream& operator<<(std::ostream& out, const UnlockedTestEntry& entry);
@@ -64,13 +64,21 @@ namespace catapult { namespace test {
 			const RawBuffer& entryBuffer,
 			EncryptionMutationFlag encryptionMutationFlag = EncryptionMutationFlag::None);
 
+	/// Creates encrypted unlocked entry around \a entryBuffer using \a ephemeralKeyPair and \a recipientPublicKey
+	/// with \a encryptionMutationFlag.
+	UnlockedTestEntry PrepareUnlockedTestEntry(
+			const crypto::KeyPair& ephemeralKeyPair,
+			const Key& recipientPublicKey,
+			const RawBuffer& entryBuffer,
+			EncryptionMutationFlag encryptionMutationFlag = EncryptionMutationFlag::None);
+
 	/// Converts unlocked \a entry to buffer.
 	std::vector<uint8_t> ConvertUnlockedTestEntryToBuffer(const UnlockedTestEntry& entry);
 
 	/// Unlocked test entry order comparator.
 	struct UnlockedTestEntryComparator {
 		bool operator()(const UnlockedTestEntry& lhs, const UnlockedTestEntry& rhs) const {
-			return lhs.Identifier < rhs.Identifier;
+			return GetMessageIdentifier(lhs) < GetMessageIdentifier(rhs);
 		}
 	};
 
