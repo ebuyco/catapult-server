@@ -19,7 +19,7 @@
 **/
 
 #pragma once
-#include "catapult/types.h"
+#include "harvesting/src/UnlockedFileQueueConsumer.h"
 #include <set>
 #include <vector>
 
@@ -33,15 +33,15 @@ namespace catapult { namespace test {
 #pragma pack(push, 1)
 	/// Unlocked test entry.
 	struct UnlockedTestEntry {
-		/// Announcer public key.
-		catapult::Key Key;
+		/// Message identifier.
+		harvesting::UnlockedEntryMessageIdentifier Identifier;
 
 		/// Encrypted unlocked entry.
 		std::array<uint8_t, Unlocked_Test_Entry_Payload_Size> Payload;
 
 		/// Returns \c true if this unlocked test entry is equal to \a rhs.
 		bool operator==(const UnlockedTestEntry& rhs) const {
-			return Key == rhs.Key && Payload == rhs.Payload;
+			return Identifier == rhs.Identifier && Payload == rhs.Payload;
 		}
 	};
 #pragma pack(pop)
@@ -70,7 +70,7 @@ namespace catapult { namespace test {
 	/// Unlocked test entry order comparator.
 	struct UnlockedTestEntryComparator {
 		bool operator()(const UnlockedTestEntry& lhs, const UnlockedTestEntry& rhs) const {
-			return lhs.Key < rhs.Key;
+			return lhs.Identifier < rhs.Identifier;
 		}
 	};
 

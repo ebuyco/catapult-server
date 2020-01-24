@@ -41,6 +41,27 @@ namespace catapult { namespace harvesting {
 
 	// endregion
 
+	// region EncryptedUnlockedEntrySize / GetMessageIdentifier
+
+	TEST(TEST_CLASS, CanGetEncryptedUnlockedEntrySize) {
+		EXPECT_EQ(32u + 16 + 32 + 16, EncryptedUnlockedEntrySize());
+	}
+
+	TEST(TEST_CLASS, CanGetMessageIdentifierFromMessage) {
+		// Arrange:
+		UnlockedEntryMessage message;
+		message.AnnouncerPublicKey = test::GenerateRandomByteArray<Key>();
+
+		// Act:
+		auto messageIdentifier = GetMessageIdentifier(message);
+
+		// Assert:
+		EXPECT_EQ(message.AnnouncerPublicKey.size(), messageIdentifier.size());
+		EXPECT_EQ_MEMORY(message.AnnouncerPublicKey.data(), messageIdentifier.data(), messageIdentifier.size());
+	}
+
+	// endregion
+
 	// region decrypt unlocked entry
 
 	namespace {

@@ -31,6 +31,9 @@ namespace catapult {
 
 namespace catapult { namespace harvesting {
 
+	struct UnlockedEntryMessageIdentifier_tag { static constexpr size_t Size = 32; };
+	using UnlockedEntryMessageIdentifier = utils::ByteArray<UnlockedEntryMessageIdentifier_tag>;
+
 	/// Unlocked entry direction.
 	enum class UnlockedEntryDirection : uint8_t {
 		/// Add unlocked entry.
@@ -54,6 +57,9 @@ namespace catapult { namespace harvesting {
 
 	/// Gets the size of encrypted entry.
 	size_t EncryptedUnlockedEntrySize();
+
+	/// Gets a unique idenfifier for \a message.
+	UnlockedEntryMessageIdentifier GetMessageIdentifier(const UnlockedEntryMessage& message);
 
 	/// Decrypts \a saltedEncrypted using \a bootKeyPair and \a publicKey.
 	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(const RawBuffer& saltedEncrypted, const crypto::KeyPair& bootKeyPair);

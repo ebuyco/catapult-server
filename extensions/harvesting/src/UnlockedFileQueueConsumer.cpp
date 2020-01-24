@@ -35,7 +35,6 @@ namespace catapult { namespace harvesting {
 			message.Direction = static_cast<UnlockedEntryDirection>(buffer[0]);
 			std::memcpy(message.AnnouncerPublicKey.data(), &buffer[1], Key::Size);
 			message.EncryptedEntry = RawBuffer{ &buffer[1 + Key::Size], EncryptedUnlockedEntrySize() };
-
 			return message;
 		}
 	}
@@ -46,6 +45,12 @@ namespace catapult { namespace harvesting {
 				+ crypto::AesInitializationVector::Size
 				+ Key::Size
 				+ Aes_Pkcs7_Padding_Size;
+	}
+
+	UnlockedEntryMessageIdentifier GetMessageIdentifier(const UnlockedEntryMessage& message) {
+		UnlockedEntryMessageIdentifier messageIdentifier;
+		std::memcpy(messageIdentifier.data(), message.AnnouncerPublicKey.data(), messageIdentifier.size());
+		return messageIdentifier;
 	}
 
 	std::pair<crypto::PrivateKey, bool> TryDecryptUnlockedEntry(const RawBuffer& saltedEncrypted, const crypto::KeyPair& bootKeyPair) {
