@@ -42,7 +42,6 @@ namespace std {
 	inline void PrintTo(const vector<uint8_t>& vector, std::ostream* pOut) {
 		*pOut << catapult::utils::HexFormat(vector);
 	}
-
 }
 
 namespace catapult { namespace utils {
