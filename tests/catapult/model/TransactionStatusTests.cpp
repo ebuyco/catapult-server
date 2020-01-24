@@ -80,8 +80,8 @@ namespace catapult { namespace model {
 				{ "default", TransactionStatus(hash1, Timestamp(234), 123) },
 				{ "copy", TransactionStatus(hash1, Timestamp(234), 123) },
 				{ "diff-hash", TransactionStatus(hash2, Timestamp(234), 123) },
-				{ "diff-deadline", TransactionStatus(hash1, Timestamp(345), 123) }
-				{ "diff-status", TransactionStatus(hash1, Timestamp(234), 234) },
+				{ "diff-deadline", TransactionStatus(hash1, Timestamp(345), 123) },
+				{ "diff-status", TransactionStatus(hash1, Timestamp(234), 234) }
 			};
 		}
 
