@@ -60,19 +60,19 @@ extern "C" {
 namespace catapult { namespace crypto {
 
 	SharedKey Hkdf_Hmac_Sha256_32(const SharedSecret& sharedSecret) {
-		Hash256 zeroSalt;
-		Hash256 prk;
-		Hmac_Sha256(zeroSalt, sharedSecret, prk);
+		Hash256 salt;
+		Hash256 pseudoRandomKey;
+		Hmac_Sha256(salt, sharedSecret, pseudoRandomKey);
 
 		// specialized for single repetition, last byte contains counter value
 		constexpr auto Buffer_Length = 8 + 1;
 		std::array<uint8_t, Buffer_Length> buffer{ { 0x63, 0x61, 0x74, 0x61, 0x70, 0x75, 0x6C, 0x74, 0x01 } };
 
 		Hash256 outputKeyingMaterial;
-		Hmac_Sha256(prk, buffer, outputKeyingMaterial);
+		Hmac_Sha256(pseudoRandomKey, buffer, outputKeyingMaterial);
 
 		SharedKey sharedKey;
-		std::memcpy(sharedKey.data(), outputKeyingMaterial.data(), Hash256::Size);
+		std::memcpy(sharedKey.data(), outputKeyingMaterial.data(), outputKeyingMaterial.size());
 		return sharedKey;
 	}
 

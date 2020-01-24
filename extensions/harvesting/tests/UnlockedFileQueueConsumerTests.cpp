@@ -144,7 +144,7 @@ namespace catapult { namespace harvesting {
 			enum class Sizes { Underflow, Normal, Overflow };
 
 			auto prepareMessage(const Key& randomPrivate, test::EncryptionMutationFlag encryptionMutationFlag) {
-				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), RawBuffer{randomPrivate}, encryptionMutationFlag);
+				auto entry = test::PrepareUnlockedTestEntry(m_keyPair.publicKey(), randomPrivate, encryptionMutationFlag);
 				return entryToMessage(entry);
 			}
 

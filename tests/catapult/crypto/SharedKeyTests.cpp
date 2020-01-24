@@ -35,44 +35,43 @@ namespace catapult { namespace crypto {
 	namespace {
 		// generic implementation to check test vectors
 		void Hkdf_Hmac_Sha256(
-				const std::vector<uint8_t>& sharedSecret,
-				const std::vector<uint8_t>& salt,
-				std::vector<uint8_t>& output,
-				const std::vector<uint8_t>& label) {
-
+				const RawBuffer& sharedSecret,
+				const RawBuffer& salt,
+				const RawBuffer& label,
+				std::vector<uint8_t>& output) {
 			Hash256 prk;
 			Hmac_Sha256(salt, sharedSecret, prk);
 
 			// T(i - 1) || label || counter
 			std::vector<uint8_t> buffer;
-			buffer.resize(Hash256::Size + label.size() + sizeof(uint8_t));
+			buffer.resize(Hash256::Size + label.Size + sizeof(uint8_t));
 
 			size_t repetitions = (output.size() + Hash256::Size - 1) / Hash256::Size;
 			size_t position = 0;
 
 			// inline first iteration
 			uint32_t counter = 1;
-			std::memcpy(buffer.data(), label.data(), label.size());
-			std::memcpy(buffer.data() + label.size(), &counter, sizeof(uint8_t));
+			std::memcpy(buffer.data(), label.pData, label.Size);
+			std::memcpy(buffer.data() + label.Size, &counter, sizeof(uint8_t));
 
 			Hash256 previousOkm;
-			Hmac_Sha256(prk, { buffer.data(), label.size() + sizeof(uint8_t) }, previousOkm);
+			Hmac_Sha256(prk, { buffer.data(), label.Size + sizeof(uint8_t) }, previousOkm);
 
-			auto written = std::min(output.size() - position, Hash256::Size);
-			std::memcpy(&output[position], previousOkm.data(), written);
-			position += written;
+			auto numBytesWritten = std::min(output.size() - position, Hash256::Size);
+			std::memcpy(&output[position], previousOkm.data(), numBytesWritten);
+			position += numBytesWritten;
 			++counter;
 
 			for (; counter <= repetitions; ++counter) {
 				std::memcpy(buffer.data(), previousOkm.data(), Hash256::Size);
-				std::memcpy(buffer.data() + Hash256::Size, label.data(), label.size());
-				std::memcpy(buffer.data() + Hash256::Size + label.size(), &counter, sizeof(uint8_t));
+				std::memcpy(buffer.data() + Hash256::Size, label.pData, label.Size);
+				std::memcpy(buffer.data() + Hash256::Size + label.Size, &counter, sizeof(uint8_t));
 
 				Hmac_Sha256(prk, buffer, previousOkm);
 
-				written = std::min(output.size() - position, Hash256::Size);
-				std::memcpy(&output[position], previousOkm.data(), written);
-				position += written;
+				numBytesWritten = std::min(output.size() - position, Hash256::Size);
+				std::memcpy(&output[position], previousOkm.data(), numBytesWritten);
+				position += numBytesWritten;
 			}
 		}
 	}
@@ -86,7 +85,7 @@ namespace catapult { namespace crypto {
 
 		// Act:
 		std::vector<uint8_t> output(expected.size());
-		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, label, output);
 
 		// Assert:
 		EXPECT_EQ(expected, output);
@@ -113,7 +112,7 @@ namespace catapult { namespace crypto {
 
 		// Act:
 		std::vector<uint8_t> output(expected.size());
-		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, label, output);
 
 		// Assert:
 		EXPECT_EQ(expected, output);
@@ -128,7 +127,7 @@ namespace catapult { namespace crypto {
 
 		// Act:
 		std::vector<uint8_t> output(expected.size());
-		Hkdf_Hmac_Sha256(sharedSecret, salt, output, label);
+		Hkdf_Hmac_Sha256(sharedSecret, salt, label, output);
 
 		// Assert:
 		EXPECT_EQ(expected, output);
@@ -142,43 +141,19 @@ namespace catapult { namespace crypto {
 		for (auto i = 0; i < 10; ++i) {
 			// - calculate expected output using generic implementation
 			auto sharedSecret = test::GenerateRandomByteArray<SharedSecret>();
-			std::vector<uint8_t> secretVec(sharedSecret.cbegin(), sharedSecret.cend());
 			std::vector<uint8_t> expectedOutput(32);
-			Hkdf_Hmac_Sha256(secretVec, salt, expectedOutput, label);
+			Hkdf_Hmac_Sha256(sharedSecret, salt, label, expectedOutput);
 
 			// Act:
 			auto sharedKey = Hkdf_Hmac_Sha256_32(sharedSecret);
 
 			// Assert:
-			std::vector<uint8_t> sharedKeyVec(sharedKey.cbegin(), sharedKey.cend());
-			EXPECT_EQ(expectedOutput, sharedKeyVec);
+			std::vector<uint8_t> sharedKeyBuffer(sharedKey.cbegin(), sharedKey.cend());
+			EXPECT_EQ(expectedOutput, sharedKeyBuffer);
 		}
 	}
 
 	// endregion
-
-	/* this test doesn't make much sense now
-	TEST(TEST_CLASS, PassesTestVector) {
-		// Arrange: private key used is the one from KeyPairTests
-#ifdef SIGNATURE_SCHEME_KECCAK
-		auto expectedSharedKey = utils::ParseByteArray<SharedKey>("E9BF812E9E29B1D4C8D01E3DA11EAB3715A582CD2AA66EABBDAFEA7DFB9B2422");
-#else
-		auto expectedSharedKey = utils::ParseByteArray<SharedKey>("0633042689A055703722FE539C900031093C224D0DF8D547F871FEFB5728B24F");
-#endif
-
-		auto rawKeyString = std::string("ED4C70D78104EB11BCD73EBDC512FEBC8FBCEB36A370C957FF7E266230BB5D57");
-		auto keyPair = KeyPair::FromString(rawKeyString);
-		auto otherPublicKey = ParseKey("0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF");
-
-		// Sanity: otherPublicKey is actually some *other* account
-		EXPECT_NE(keyPair.publicKey(), otherPublicKey);
-
-		// Act:
-		auto sharedKey = DeriveSharedKey(keyPair, otherPublicKey);
-
-		// Assert:
-		EXPECT_EQ(expectedSharedKey, sharedKey);
-	} */
 
 	namespace {
 		auto CreateKeyPair(const Key& privateKey) {

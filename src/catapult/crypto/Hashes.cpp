@@ -124,17 +124,17 @@ namespace catapult { namespace crypto {
 			outerKeyPad[i] ^= 0x5C;
 		}
 
-		crypto_hash_sha256_state outerState;
-		crypto_hash_sha256_state innerState;
-		crypto_hash_sha256_init(&outerState);
-		crypto_hash_sha256_init(&innerState);
 
-		Hash256 innerHash;
-		crypto_hash_sha256_update(&innerState, innerKeyPad.data(), Sha256_Block::Size);
+		crypto_hash_sha256_state innerState;
+		crypto_hash_sha256_init(&innerState);
+		crypto_hash_sha256_update(&innerState, innerKeyPad.data(), innerKeyPad.size());
 		crypto_hash_sha256_update(&innerState, input.pData, input.Size);
+		Hash256 innerHash;
 		crypto_hash_sha256_final(&innerState, innerHash.data());
 
-		crypto_hash_sha256_update(&outerState, outerKeyPad.data(), Sha256_Block::Size);
+		crypto_hash_sha256_state outerState;
+		crypto_hash_sha256_init(&outerState);
+		crypto_hash_sha256_update(&outerState, outerKeyPad.data(), outerKeyPad.size());
 		crypto_hash_sha256_update(&outerState, innerHash.data(), innerHash.size());
 		crypto_hash_sha256_final(&outerState, output.data());
 	}
