@@ -19,8 +19,8 @@
 **/
 
 #include "catapult/model/TransactionStatus.h"
-#include "tests/test/nodeps/Equality.h"
 #include "tests/test/nodeps/Alignment.h"
+#include "tests/test/nodeps/Equality.h"
 #include "tests/TestHarness.h"
 
 namespace catapult { namespace model {
@@ -49,6 +49,8 @@ namespace catapult { namespace model {
 		TRANSACTION_STATUS_FIELDS
 #undef FIELD
 	}
+
+#undef TRANSACTION_STATUS_FIELDS
 
 	// endregion
 
